@@ -200,6 +200,17 @@
             background: #b8941f;
         }
 
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            border: 2px solid #c3e6cb;
+            text-align: center;
+        }
+
         /* Registry */
         .registry-grid {
             display: grid;
@@ -304,7 +315,7 @@
         <h2>Our Story</h2>
         <div class="story-content">
             <div class="story-text">
-                <p>We met five years ago at a coffee shop in downtown. Phindulo accidentally spilled coffee on Palesa's laptop, and while apologizing profusely, he offered to buy her a new one. Phindulo laughed and said a date would be sufficient compensation.</p>
+                <p>We met five years ago at a coffee shop in downtown. Phindulo accidentally spilled coffee on Palesa's laptop, and while apologizing profusely, he offered to buy her a new one. Palesa laughed and said a date would be sufficient compensation.</p>
                 <br>
                 <p>From that moment, we knew we had found something special. Through adventures, challenges, and countless memories, our love has only grown stronger. Now we're excited to celebrate this next chapter with all of you!</p>
             </div>
@@ -345,37 +356,42 @@
     <!-- RSVP -->
     <section id="rsvp">
         <h2>RSVP</h2>
-        <form class="rsvp-form" onsubmit="handleRSVP(event)">
-            <div class="form-group">
-                <label for="name">Full Name *</label>
-                <input type="text" id="name" required>
+        <div class="rsvp-form">
+            <div class="success-message" id="successMessage">
+                Thank you for your RSVP! We've received your response and can't wait to celebrate with you!
             </div>
-            <div class="form-group">
-                <label for="email">Email *</label>
-                <input type="email" id="email" required>
-            </div>
-            <div class="form-group">
-                <label for="guests">Number of Guests *</label>
-                <input type="number" id="guests" min="1" max="5" required>
-            </div>
-            <div class="form-group">
-                <label for="attendance">Will you attend? *</label>
-                <select id="attendance" required>
-                    <option value="">Please select</option>
-                    <option value="yes">Joyfully accept</option>
-                    <option value="no">Regretfully decline</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="dietary">Dietary Restrictions</label>
-                <textarea id="dietary" placeholder="Please let us know of any dietary restrictions or allergies"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="message">Message to the Couple</label>
-                <textarea id="message" placeholder="Share your excitement or well wishes!"></textarea>
-            </div>
-            <button type="submit" class="submit-btn">Submit RSVP</button>
-        </form>
+            <form action="https://formspree.io/f/meoykzkp" method="POST" id="rsvpForm">
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="guests">Number of Guests *</label>
+                    <input type="number" id="guests" name="guests" min="1" max="5" required>
+                </div>
+                <div class="form-group">
+                    <label for="attendance">Will you attend? *</label>
+                    <select id="attendance" name="attendance" required>
+                        <option value="">Please select</option>
+                        <option value="Joyfully accept">Joyfully accept</option>
+                        <option value="Regretfully decline">Regretfully decline</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dietary">Dietary Restrictions</label>
+                    <textarea id="dietary" name="dietary" placeholder="Please let us know of any dietary restrictions or allergies"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message to the Couple</label>
+                    <textarea id="message" name="message" placeholder="Share your excitement or well wishes!"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Submit RSVP</button>
+            </form>
+        </div>
     </section>
 
     <!-- Registry -->
@@ -415,27 +431,45 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2026 Sarah & John's Wedding | See you on June 15th!</p>
+        <p>&copy; 2026 Palesa & Phindulo's Wedding | See you on June 15th!</p>
     </footer>
 
     <script>
-        function handleRSVP(event) {
-            event.preventDefault();
-            
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const guests = document.getElementById('guests').value;
-            const attendance = document.getElementById('attendance').value;
-            const dietary = document.getElementById('dietary').value;
-            const message = document.getElementById('message').value;
+        const form = document.getElementById('rsvpForm');
+        const successMessage = document.getElementById('successMessage');
 
-            alert(`Thank you ${name}! Your RSVP has been submitted.\n\nWe've recorded:\n- ${guests} guest(s)\n- Attendance: ${attendance === 'yes' ? 'Yes' : 'No'}\n\nYou will receive a confirmation email at ${email}.`);
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            // In a real website, you would send this data to a server
-            console.log({name, email, guests, attendance, dietary, message});
+            const formData = new FormData(form);
             
-            event.target.reset();
-        }
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    successMessage.style.display = 'block';
+                    form.reset();
+                    
+                    // Scroll to success message
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    
+                    // Hide message after 7 seconds
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 7000);
+                } else {
+                    alert('Oops! There was a problem submitting your RSVP. Please try again or contact us directly.');
+                }
+            })
+            .catch(error => {
+                alert('Oops! There was a problem submitting your RSVP. Please try again or contact us directly.');
+            });
+        });
 
         // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
